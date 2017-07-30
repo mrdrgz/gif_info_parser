@@ -61,6 +61,12 @@ KITTEN,SongAndDance,Foxtrot
 KITTEN,PateAChoux,Eclair
 KITTEN,PateAChoux,Croquembouche
 KITTEN,PateAChoux,Beignet
+KITTEN,Chillis,Kidney
+KITTEN,Chillis,Garbanzo
+KITTEN,Chillis,Pinto
+KITTEN,Chillis,Tomato
+KITTEN,Chillis,Coriander
+KITTEN,Chillis,Cayenne
 MOMCAT,HazelsSeven,Hazel
 MOMCAT,EnglishDesserts,Vicky
 MOMCAT,LeagueAndWeathercats,Ivy
@@ -70,6 +76,7 @@ MOMCAT,Coffees,Star
 MOMCAT,Fish,Angel
 MOMCAT,SongAndDance,Song
 MOMCAT,PateAChoux,Roux
+MOMCAT,Chillis,Chilli
 MOMCAT,NotMomcat,Abby
 FACULTY,Faculty,Custard
 FACULTY,Faculty,Loganberry
