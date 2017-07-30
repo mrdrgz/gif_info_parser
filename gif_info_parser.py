@@ -7,8 +7,8 @@ from collections import defaultdict
 from itertools import groupby
 from nltk.corpus import stopwords
 
-reload(sys)  
-sys.setdefaultencoding('utf8')
+#reload(sys)  
+#sys.setdefaultencoding('utf8')
 
 def read_parsing_keywords(kfile):
     '''(Uglily) Parse custom file with keywords to use in the parsing step
@@ -35,14 +35,14 @@ def read_parsing_keywords(kfile):
 
     return(keywords)
                 
-def parse_date(string):
+def parse_date(string, default_date=datetime.date(2016,01,01)):
     ''' Apply fuzzy datetime.parser to strings. If a suitable date is not found,
-    then 1900-01-01 is returned. Return value is a datetime object in date format'''
+    then the default date is returned. Return value is a datetime object in date format'''
     try:
         dateString = dparser.parse(string,fuzzy=True)
         return (dateString.date())
     except ValueError:
-        return datetime.date(2016,01,01)
+        return default_date
 
 def parse_giffer(string):
     ''' Apply ugly regex to extract the name of a putative giffer, assuming that 
@@ -68,7 +68,7 @@ def search_word(w,d,default=None):
         return(default)    
 
 def categorize_words(wl,d, default="UNKNOWN"):
-    ''' Categorize words according to input file categories'''
+    ''' Categorize words according to the defined input file categories'''
     categories = [search_word(w,d,default=default) for w in wl]
     CategorizedWords = defaultdict(list)
     for x in zip(categories,wl):
@@ -76,31 +76,29 @@ def categorize_words(wl,d, default="UNKNOWN"):
     return(CategorizedWords)
 
 
-def parse_category(w, categories, d):
+def parse_category(cat, categories, d):
     ''' Ugly function to parse category
     If the category is not present in the category list in the dictionary:
     1) Check if there are kittens associated. If so, add category from kittens
     2) Check if there are momcats associated. If so, add category from Momcat
     3) Check if there are faculty names or humans associated, add corresponding categories'''
-    clss = w
-    if clss in d["MERGED"]["CATEGORY"]:
-        return(clss)
-    elif clss not in d["MERGED"]["CATEGORY"] and len(categories["KITTEN"])>0:
+    if cat in d["MERGED"]["CATEGORY"]:
+        return(cat)
+    elif cat not in d["MERGED"]["CATEGORY"] and len(categories["KITTEN"])>0:
         ## If class is incorrect, check if there are kitten names found
         return (','.join(list(set(search_word(w,d["KITTEN"]) for w in categories["KITTEN"]) )))
-    elif clss not in d["MERGED"]["CATEGORY"] and len(categories["MOMCAT"])>0:
+    elif cat not in d["MERGED"]["CATEGORY"] and len(categories["MOMCAT"])>0:
         ## If class is incorrect, check if there is a momcat name found
         return (','.join(list(set(search_word(w,d["MOMCAT"]) for w in categories["MOMCAT"]) )))
-    elif clss not in d["MERGED"]["CATEGORY"] and len(categories["FACULTY"])>0:
+    elif cat not in d["MERGED"]["CATEGORY"] and len(categories["FACULTY"])>0:
         return("faculty")
-    elif clss not in d["MERGED"]["CATEGORY"] and len(categories["HUMAN"])>0:
+    elif cat not in d["MERGED"]["CATEGORY"] and len(categories["HUMAN"])>0:
         return('humans')
     else:
         return("unknown")    
 
-def print_categorization(x):
+def print_categorization(x,k_val=["KITTEN","MOMCAT","FACULTY","HUMAN","OTHER"]):
     ''' Join together keys and values'''
-    k_val = ["KITTEN","MOMCAT","FACULTY","HUMAN","OTHER"]
     k_str = []
     for k in k_val:
         if k in x.keys():
@@ -109,15 +107,15 @@ def print_categorization(x):
             val = [""]
         k_str.append( ','.join(val) )
 
-    l2 = ';'.join(['%s=%s' % t for t in zip(k_val, k_str)])
-    return l2
+    l2print = ';'.join(['%s=%s' % t for t in zip(k_val, k_str)])
+    return l2print
 
 def main():
     
     keywords = read_parsing_keywords("keywords.csv")
     
     # Print header    
-    print '\t'.join(["#Category","Date","Giffer","URL","Parsed_Metadata"])
+    print '\t'.join(["#Category","Date","Giffer","URL","Parsed_Metadata", "Cleaned_Metadata"])
 
     for line in sys.stdin:
         
@@ -125,7 +123,7 @@ def main():
         # Split by gifURL file extension and following space because
         # someone thought putting spaces in the filename is Okay. But it's not.
         gifURL, gifMeta = re.split(r".gif\s+", line.rstrip())
-        
+                
         # 1st gsub: Replace special characters and spaces if present.
         # 2nd gsub: replace file extension in metadata
         gifMeta =  re.sub('[!@#$. ]', '', re.sub('.gif', '', gifMeta) )
@@ -165,6 +163,6 @@ def main():
         
         categorizedWordsPrint = print_categorization(categorizedWords)
         
-        print '\t'.join([gifCategory, str(gifDate), gifGiffer, gifURL, categorizedWordsPrint])
+        print '\t'.join([gifCategory, str(gifDate), gifGiffer, gifURL, categorizedWordsPrint, gifMetaClean])
         
 main()
