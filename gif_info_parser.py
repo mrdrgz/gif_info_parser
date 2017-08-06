@@ -7,8 +7,8 @@ from collections import defaultdict
 from itertools import groupby
 from nltk.corpus import stopwords
 
-#reload(sys)  
-#sys.setdefaultencoding('utf8')
+reload(sys)  
+sys.setdefaultencoding('utf8')
 
 def read_parsing_keywords(kfile):
     '''(Uglily) Parse custom file with keywords to use in the parsing step
@@ -123,10 +123,13 @@ def main():
         # Split by gifURL file extension and following space because
         # someone thought putting spaces in the filename is Okay. But it's not.
         gifURL, gifMeta = re.split(r".gif\s+", line.rstrip())
-                
+        
+        # Fix smol non-unicode problem... by deleting those evil characters
+        gifMeta = gifMeta.encode('ascii', 'ignore')
+        
         # 1st gsub: Replace special characters and spaces if present.
         # 2nd gsub: replace file extension in metadata
-        gifMeta =  re.sub('[!@#$. ]', '', re.sub('.gif', '', gifMeta) )
+        #gifMeta =  re.sub('[!@#$. ]', '', re.sub('.gif', '', gifMeta) )
         
         # --------------------------- PARSE INFO ---------------------------
         # Parse date. If missing, 2016/01/01 is assigned
