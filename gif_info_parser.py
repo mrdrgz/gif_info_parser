@@ -139,7 +139,7 @@ def main():
         
         # 1st gsub: Replace special characters and spaces if present.
         # 2nd gsub: replace file extension in metadata
-        #gifMeta =  re.sub('[!@#$. ]', '', re.sub('.gif', '', gifMeta) )
+        gifMeta =  re.sub('[!@#$. ]', '', re.sub('.gif', '', gifMeta) )
         
         # --------------------------- PARSE INFO ---------------------------
         # Parse date. If missing, 2016/01/01 is assigned
