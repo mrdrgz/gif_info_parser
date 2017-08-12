@@ -5,6 +5,7 @@ import dateutil.parser as dparser
 import unidecode
 from collections import defaultdict
 from itertools import groupby
+import requests
 from nltk.corpus import stopwords
 
 reload(sys)  
@@ -75,7 +76,6 @@ def categorize_words(wl,d, default="UNKNOWN"):
         CategorizedWords[x[0]].append(x[1])
     return(CategorizedWords)
 
-
 def parse_category(cat, categories, d):
     ''' Ugly function to parse category
     If the category is not present in the category list in the dictionary:
@@ -110,19 +110,29 @@ def print_categorization(x,k_val=["KITTEN","MOMCAT","FACULTY","HUMAN","OTHER"]):
     l2print = ';'.join(['%s=%s' % t for t in zip(k_val, k_str)])
     return l2print
 
+def get_all_gifs():
+    '''Request all gifs in JSON format'''
+    api_url = "http://kitten.ga/tags/?text="
+    response = requests.get(api_url)
+    data = response.json()
+    return(data)
+
+
 def main():
     
     keywords = read_parsing_keywords("keywords.csv")
     
     # Print header    
     print '\t'.join(["#Category","Date","Giffer","URL","Parsed_Metadata", "Cleaned_Metadata"])
-
-    for line in sys.stdin:
-        
+    
+    allGifs = get_all_gifs()
+    
+    for gif in allGifs:
         # ------------------------ CLEAN UP STRING -------------------------
         # Split by gifURL file extension and following space because
         # someone thought putting spaces in the filename is Okay. But it's not.
-        gifURL, gifMeta = re.split(r".gif\s+", line.rstrip())
+        gifURL = "http://kitten.ga/gifs/{}.gif".format(gif['id'])
+        gifMeta = gif['name']
         
         # Fix smol non-unicode problem... by deleting those evil characters
         gifMeta = gifMeta.encode('ascii', 'ignore')
