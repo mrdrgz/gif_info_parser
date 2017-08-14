@@ -67,6 +67,11 @@ KITTEN,Chilies,Pinto
 KITTEN,Chilies,Tomato
 KITTEN,Chilies,Coriander
 KITTEN,Chilies,Cayenne
+KITTEN,Purrsians,Hummus
+KITTEN,Purrsians,Falafel
+KITTEN,Purrsians,Tahini
+KITTEN,Purrsians,Babaganoush
+KITTEN,Purrsians,MrPickles
 MOMCAT,HazelsSeven,Hazel
 MOMCAT,EnglishDesserts,Vicky
 MOMCAT,LeagueAndWeathercats,Ivy
@@ -116,6 +121,7 @@ ALTNAME,SongAndDance,Squints:Quintet:dancers:dance:Quintets
 ALTNAME,Coffees,Coffee:Stars
 ALTNAME,Fish,angels
 ALTNAME,HazelsSeven,Seven:Hazels
+ALTNAME,Chili,Chilli:ChiliKittens:Chili_kittens
 # Kittens and cats
 ALTNAME,Beignet,Ben
 ALTNAME,Croquembouche,Cro:Croquie

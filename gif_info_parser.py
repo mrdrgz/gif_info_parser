@@ -39,11 +39,29 @@ def read_parsing_keywords(kfile):
 def parse_date(string, default_date=datetime.date(2016,01,01)):
     ''' Apply fuzzy datetime.parser to strings. If a suitable date is not found,
     then the default date is returned. Return value is a datetime object in date format'''
+   
+    # Fix dates with _ between numbers (in all kinds of horrible combinations)
+    string_fixed = re.sub(r"(\d{2,4})_(\d+)_(\d+)", r"\1-\2-\3", string)
+    string_fixed = re.sub("_(17)-(\d+)-(\d+)", r"_2017-\2-\3", string_fixed)
+    string_fixed = re.sub("-(\d{2})_(\d{2})", r"\1-\2", string_fixed)
+    string_fixed = re.sub("_(\d{4})_(\d{2})", r"\1-\2", string_fixed)
+    
     try:
-        dateString = dparser.parse(string,fuzzy=True)
-        return (dateString.date())
+        dateString = dparser.parse(string_fixed,fuzzy=True).date()
+        if dateString > datetime.datetime(2015,1,1).date() and dateString < datetime.datetime.now().date():
+            return (dateString)
+        else:
+            return default_date
     except ValueError:
-        return default_date
+        match_full_date    = re.search(r'(\d{2,4}-\d{2}-\d{2})', string)
+        match_partial_date = re.search(r'(\d{2,4}-\d{2})', string)
+        if match_full_date is not None:
+            return(match_full_date.group(0))
+        elif match_partial_date is not None:
+            dateString = "{}-00".format(match_partial_date.group(0))
+            return(dateString)
+        else:
+            return "1970-01-01"
 
 def parse_giffer(string):
     ''' Apply ugly regex to extract the name of a putative giffer, assuming that 
@@ -51,7 +69,11 @@ def parse_giffer(string):
     giffer_match = re.compile(r".*\d+_(.*)$")
     try:
         found = giffer_match.search(string)
-        return(found.group(1))
+        giffer_name = found.group(1)
+        if (re.search('[a-zA-Z]', giffer_name)):
+            return(giffer_name)
+        else:
+            return("Unknown")
     except:
         return("Unknown")
     
@@ -123,9 +145,10 @@ def main():
     keywords = read_parsing_keywords("keywords.csv")
     
     # Print header    
-    print '\t'.join(["#Category","Date","Giffer","URL","Parsed_Metadata", "Cleaned_Metadata"])
+    print '\t'.join(["Category","Date","Giffer","URL","Parsed_Metadata", "Cleaned_Metadata", "Original_Metadata"])
     
     allGifs = get_all_gifs()
+    
     
     for gif in allGifs:
         # ------------------------ CLEAN UP STRING -------------------------
@@ -150,7 +173,7 @@ def main():
         
         # -------------------- PARSE AND CLASSIFY WORDS --------------------
         # Create a string without date and giffer
-        gifMetaClean = re.sub('[-_]\d{4}.*$', '', gifMeta) 
+        gifMetaClean = re.sub('[-_]\d{2,4}.*$', '', gifMeta) 
         
         # Collapse possible _\d elements at the end of the string
         gifMetaClean = re.sub('_(\d{1})$', "\1", gifMetaClean)
@@ -176,6 +199,6 @@ def main():
         
         categorizedWordsPrint = print_categorization(categorizedWords)
         
-        print '\t'.join([gifCategory, str(gifDate), gifGiffer, gifURL, categorizedWordsPrint, gifMetaClean])
+        print '\t'.join([gifCategory, str(gifDate), gifGiffer, gifURL, categorizedWordsPrint, gifMetaClean, gifMeta])
         
 main()
